@@ -1,28 +1,145 @@
 For this workshop. We will demonstration enhance security on docker
 
 
-Part1: Security Scan for Docker image
+Part1: Docker Bench for Security 
 -----------------------------------------------------------------------------------------------------------------
-1. Run container for test default profile of Apparmor by command: "docker container run -dt --name sectestdefault labdocker/alpine:latest sh"
+1. Pull script from git by command: "cd ~/ && git clone https://github.com/docker/docker-bench-security.git"
 
-2. Access in to container and test some activity:
-	docker container exec -it sectestdefault sh
-	ping 1.1.1.1
-	apk update
-	apk add curl
-	curl https://www.google.com
+2. Build docker image by command: "cd docker-bench-security && docker build --no-cache -t docker-bench-security ."
 
-3. Test write file on /proc (prohibit path):
-	touch /tmp/testcreatefile1
-	touch /home/testcreatefile2
-	touch /etc/testcreatefile3
-	touch /proc/testcreatefile4
-	cp /tmp/testcreatefile /proc/testprohibitfile
-	ls -hl /proc | grep test
+3. Run docker container for security scan by command:
+	docker run -it --net host --pid host --cap-add audit_control \
+    -e DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST \
+    -v /var/lib:/var/lib:ro \
+    -v /var/run/docker.sock:/var/run/docker.sock:ro \
+    -v /usr/lib/systemd:/usr/lib/systemd:ro \
+    -v /etc:/etc:ro --label docker_bench_security \
+    docker-bench-security
 
-4. Stop test container b
+4. Enhance audit by command:
+	sudo su -
+	apt-get install -y auditd
+	echo "-w /usr/bin/docker -p wa" >> /etc/audit/rules.d/audit.rules
+	echo "-w /var/lib/docker -p wa" >> /etc/audit/rules.d/audit.rules
+	echo "-w /usr/bin/docker -k docker" >> /etc/audit/rules.d/audit.rules
+	echo "-w /lib/systemd/system/docker.service -p wa" >> /etc/audit/rules.d/audit.rules
+	echo "-w /lib/systemd/system/docker.socket -p wa" >> /etc/audit/rules.d/audit.rules
+	echo "-w /etc/default/docker -p wa" >> /etc/audit/rules.d/audit.rules
+	echo "-w /etc/docker/daemon.json -p wa" >> /etc/audit/rules.d/audit.rules
+	echo "-w /usr/bin/docker-containerd -p wa" >> /etc/audit/rules.d/audit.rules
+	echo "-w /usr/bin/docker-runc -p wa" >> /etc/audit/rules.d/audit.rules
+	systemctl restart auditd
+	systemctl enable auditd
+	auditctl -l
+	exit
 
-Part2: Apparmor in Container
+5. Run docker container for security scan by command:
+	docker run -it --net host --pid host --cap-add audit_control \
+    -e DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST \
+    -v /var/lib:/var/lib:ro \
+    -v /var/run/docker.sock:/var/run/docker.sock:ro \
+    -v /usr/lib/systemd:/usr/lib/systemd:ro \
+    -v /etc:/etc:ro --label docker_bench_security \
+    docker-bench-security
+
+
+-----------------------------------------------------------------------------------------------------------------
+Part2: Docker vulnerability scan via Anchore
+-----------------------------------------------------------------------------------------------------------------
+1. Create volume for persistency storage by command: 
+mkdir ~/anchore-volume
+cd ~/anchore-volume
+
+2. Pull template image and extract docker-compose by command:
+docker pull docker.io/anchore/anchore-engine:latest
+docker create --name ae docker.io/anchore/anchore-engine:latest
+docker cp ae:/docker-compose.yaml ~/anchore-volume/docker-compose.yaml
+docker rm ae
+
+3. Start deploy anchore by command:
+docker-compose pull
+docker-compose up -d
+
+4. Check status of anchore by command: (Wait 5 - 8 min)
+docker-compose ps
+
+4. Install anchore cli for interact with scanning system by command:
+sudo apt-get update
+sudo apt-get -y install python-pip
+pip install anchorecli
+
+5. Export environment variable for start operate:
+export ANCHORE_CLI_URL=http://localhost:8228/v1
+export ANCHORE_CLI_USER=admin
+export ANCHORE_CLI_PASS=foobar
+export PATH="$HOME/.local/bin/:$PATH"
+
+6. Test list image on anchore inventory by command:
+anchore-cli image wait
+anchore-cli image list
+
+7. Add image for anchore's inventory by command:
+anchore-cli image add kong:1.5.1-alpine
+anchore-cli image add bitnami/postgresql:latest
+anchore-cli image add labdocker/alpine:latest
+anchore-cli image add labdocker/alpineweb:latest
+
+8. Check status of image analysis by command:
+anchore-cli image list
+
+9. Get overview of each image analyze result by command:
+anchore-cli image get kong:1.5.1-alpine
+anchore-cli image get bitnami/postgresql:latest
+anchore-cli image get labdocker/alpine:latest
+anchore-cli image get labdocker/alpineweb:latest
+
+10. Check status of anchore system sync database for vulnerability by command:
+anchore-cli system feeds list
+anchore-cli system wait
+
+
+12. Check image content scan by command:
+anchore-cli image content kong:1.5.1-alpine os
+anchore-cli image content bitnami/postgresql:latest files
+anchore-cli image content labdocker/alpine:latest os
+anchore-cli image content labdocker/alpineweb:latest npm
+
+13. Check vulnerability scan for image by command:
+anchore-cli image vuln kong:1.5.1-alpine all
+anchore-cli image vuln bitnami/postgresql:latest all
+anchore-cli image vuln labdocker/alpine:latest all
+anchore-cli image vuln labdocker/alpineweb:latest all
+
+14. Check scan policy list by command:
+anchore-cli policy hub list
+
+15. Download policy for "anchore_security_only" by command:
+anchore-cli policy hub get anchore_security_only
+
+16. Install policy by command:
+anchore-cli policy hub install anchore_security_only
+
+17. Check and activate new policy by command:
+anchore-cli policy list
+anchore-cli policy activate anchore_security_only
+
+18. Check vulnerability scan for image by command:
+anchore-cli image vuln kong:1.5.1-alpine all
+anchore-cli image vuln bitnami/postgresql:latest all
+anchore-cli image vuln labdocker/alpine:latest all
+anchore-cli image vuln labdocker/alpineweb:latest all
+
+19. Check json of policyby command:
+anchore-cli --json policy hub get anchore_security_only > /tmp/anchore_security_only.json
+more /tmp/anchore_security_only.json
+
+20. ClearUp lab by command:
+cd ~/anchore-volume
+docker-compose down
+
+
+-----------------------------------------------------------------------------------------------------------------
+Part3: Apparmor in Container
 -----------------------------------------------------------------------------------------------------------------
 1. Run container for test default profile of Apparmor by command: "docker container run -dt --name sectestdefault labdocker/alpine:latest sh"
 
@@ -73,7 +190,7 @@ Part2: Apparmor in Container
 
 
 -----------------------------------------------------------------------------------------------------------------
-Part2: Content Trust (Signed Image)
+Part4: Content Trust (Signed Image)
 -----------------------------------------------------------------------------------------------------------------
 1. Enable content trust feature by command:
 export DOCKER_CONTENT_TRUST=1
