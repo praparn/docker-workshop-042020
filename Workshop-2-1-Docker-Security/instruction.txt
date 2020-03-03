@@ -1,6 +1,28 @@
 For this workshop. We will demonstration enhance security on docker
 
-Part1: Apparmor in Container
+
+Part1: Security Scan for Docker image
+-----------------------------------------------------------------------------------------------------------------
+1. Run container for test default profile of Apparmor by command: "docker container run -dt --name sectestdefault labdocker/alpine:latest sh"
+
+2. Access in to container and test some activity:
+	docker container exec -it sectestdefault sh
+	ping 1.1.1.1
+	apk update
+	apk add curl
+	curl https://www.google.com
+
+3. Test write file on /proc (prohibit path):
+	touch /tmp/testcreatefile1
+	touch /home/testcreatefile2
+	touch /etc/testcreatefile3
+	touch /proc/testcreatefile4
+	cp /tmp/testcreatefile /proc/testprohibitfile
+	ls -hl /proc | grep test
+
+4. Stop test container b
+
+Part2: Apparmor in Container
 -----------------------------------------------------------------------------------------------------------------
 1. Run container for test default profile of Apparmor by command: "docker container run -dt --name sectestdefault labdocker/alpine:latest sh"
 
@@ -47,6 +69,7 @@ Part1: Apparmor in Container
 10. Stop test container by command: "docker container stop sectestrestrict && docker container rm sectestrestrict"
 
 11. Remove apparmor profile by command: sudo apparmor_parser -R ~/docker-workshop-042020/Workshop-1-9-Docker-Security/restrict-apparmor && sudo aa-status
+
 
 
 -----------------------------------------------------------------------------------------------------------------

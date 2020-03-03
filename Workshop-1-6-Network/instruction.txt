@@ -47,23 +47,32 @@ Part1: Reverse Proxy by DNS
   mkdir ~/kong/postgres
   mkdir ~/kong/kong-configuration
 
+  *Remark: Case repeat workshop on no 10
+  sudo rm -rf ~/kong
+  mkdir ~/kong
+  mkdir ~/kong/postgres
+  mkdir ~/kong/kong-configuration
+
 	10.2 Create database by command:
-	docker image pull postgres:9.6
+	docker image pull postgres:9.6.17
 	docker container run -dt --name kong-database \
     --network=webinternal -p 5432:5432 \
     --mount type=bind,source=/home/ubuntu/kong/postgres,target=/var/lib/postgresql/data \
-    -e "POSTGRES_USER=kong" -e "POSTGRES_DB=kong" \
-    postgres:9.6
+    -e "POSTGRES_USER=kong" -e "POSTGRES_DB=kong" -e "POSTGRES_PASSWORD=kong" \
+    postgres:9.6.17
 
 	10.3 Initial database for kong by command:
-	docker image pull kong:1.2.1
+  docker pull kong:1.5.1-alpine
 	docker container run --rm \
      --network=webinternal \
      -e "KONG_DATABASE=postgres" \
      -e "KONG_PG_HOST=kong-database" \
-     kong:1.2.1 kong migrations bootstrap
+     -e "KONG_PG_PASSWORD=kong" \
+     -e "KONG_PG_USER=kong" \
+     -e "KONG_PG_DATABASE=kong" \
+     kong:1.5.1-alpine kong migrations bootstrap
 
-	10.4 Run kon api gateway by command:
+	10.4 Run kong api gateway by command:
 	docker container run -d --name kong \
      --network=webinternal \
      -e "KONG_DATABASE=postgres" \
@@ -73,11 +82,14 @@ Part1: Reverse Proxy by DNS
      -e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
      -e "KONG_ADMIN_ERROR_LOG=/dev/stderr" \
      -e "KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl" \
+     -e "KONG_PG_PASSWORD=kong" \
+     -e "KONG_PG_USER=kong" \
+     -e "KONG_PG_DATABASE=kong" \
      -p 80:8000 \
      -p 443:8443 \
      -p 8001:8001 \
      -p 8444:8444 \
-     kong:1.2.1
+     kong:1.5.1-alpine
 
 	*Remark: 
 	:8000 on which Kong listens for incoming HTTP traffic from your clients, and forwards it to your upstream services.
@@ -93,10 +105,10 @@ Part1: Reverse Proxy by DNS
     pantsel/konga:next
 
 	10.6 Install PGAdmin by command:
-	docker image pull dpage/pgadmin4:4.11
+	docker image pull dpage/pgadmin4:4.18
   docker container run -p 8080:80 --name pgadmin \
 	--network=webinternal -e "PGADMIN_DEFAULT_EMAIL=kong@localdomain.com" \
-    -e "PGADMIN_DEFAULT_PASSWORD=kong" -d dpage/pgadmin4:4.11
+    -e "PGADMIN_DEFAULT_PASSWORD=kong" -d dpage/pgadmin4:4.18
 
 	10.7 (local) Test open GUI:
 	http://<public ip>:8080		==> PGAdmin (Email Address: kong@localdomain.com, Password: kong) ==> Add Server: <private ip>, username: kong, password:kong
@@ -146,20 +158,13 @@ curl -i -X POST \
   --data 'paths=/nodejs' \
   --data 'strip_path=true'
 
-14.(local) Add hosts for call "webtestthailand.com"
-	For Windows:
-		<public ip> webtestthailand.com
-
-	For Mac:
-	echo "<public ip> webtestthailand.com" | sudo tee -a /private/etc/hosts
-
-15. Open curl for test
+14. Open curl for test
 	curl -i -X GET \
   --url https://<public ip/private ip>/nodejs --header 'Host: webtestthailand.com' -k
 
 	Or: browser: https://webtestthailand.com/nodejs
 
-16. Enable authentication via api-key by command:
+15. Enable authentication via api-key by command:
 	curl -i -X POST \
   --url http://localhost:8001/services/service-webtestthailand/plugins/ \
   --data 'name=key-auth'
@@ -172,7 +177,7 @@ curl -i -X POST \
   --url http://localhost:8001/consumers/public1/key-auth/ \
   --data 'key=thisisfirsttestapikeypublic112345678'
 
-17. Test curl again with and without api-key:
+16. Test curl again with and without api-key:
 
 	Without API-Key:
 	curl -i -X GET \
@@ -182,7 +187,7 @@ curl -i -X POST \
 	curl -i -X GET \
   --url https://<public ip/private ip>/nodejs --header 'Host: webtestthailand.com' --header "apikey: thisisfirsttestapikeypublic112345678" -k
 
-18. Clean up container with command:
+17. Clean up container with command:
 	docker container stop web1 web2 konga kong kong-database pgadmin
 	docker container rm web1 web2 konga kong kong-database pgadmin
 	docker network rm webpublic webinternal
