@@ -73,7 +73,7 @@ Part 3: RESTFUL Python
 	docker container run -dt --name cachedb --net=restful_switch --network-alias=cachedb labdocker/redis:latest
 
 	(webservice: pythonrestful)
-	docker container run -dt --name webservice --net=restful_switch --network-alias=webservice -p 5000:5000 labdocker/webservice:1.0 
+	docker container run -dt --name webservice --net=restful_switch --network-alias=webservice -p 5000:5000 labdocker/webservice:1.0
 
 	(webcache: nginx)
 	docker container run -dt --name webcache --net=restful_switch --network-alias=webcache -p 80:8080 labdocker/webcache:1.0

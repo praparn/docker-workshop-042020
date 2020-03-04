@@ -1,6 +1,5 @@
 For this workshop. We will demonstration enhance security on docker
 
-
 Part1: Docker Bench for Security 
 -----------------------------------------------------------------------------------------------------------------
 1. Pull script from git by command: "cd ~/ && git clone https://github.com/docker/docker-bench-security.git"
@@ -42,7 +41,9 @@ Part1: Docker Bench for Security
     -v /etc:/etc:ro --label docker_bench_security \
     docker-bench-security
 
-
+6. CleanUp Lab by command:
+	cd ~/
+	rm -rf ~/docker-bench-security
 -----------------------------------------------------------------------------------------------------------------
 Part2: Docker vulnerability scan via Anchore
 -----------------------------------------------------------------------------------------------------------------
@@ -60,9 +61,6 @@ docker rm ae
 docker-compose pull
 docker-compose up -d
 
-4. Check status of anchore by command: (Wait 5 - 8 min)
-docker-compose ps
-
 4. Install anchore cli for interact with scanning system by command:
 sudo apt-get update
 sudo apt-get -y install python-pip
@@ -74,26 +72,28 @@ export ANCHORE_CLI_USER=admin
 export ANCHORE_CLI_PASS=foobar
 export PATH="$HOME/.local/bin/:$PATH"
 
-6. Test list image on anchore inventory by command:
-anchore-cli image wait
+6. Check status of anchore by command: (Wait 5 - 10 min for download database)
+watch docker-compose ps
+
+7. Test list image on anchore inventory by command:
 anchore-cli image list
 
-7. Add image for anchore's inventory by command:
+8. Add image for anchore's inventory by command:
 anchore-cli image add kong:1.5.1-alpine
 anchore-cli image add bitnami/postgresql:latest
 anchore-cli image add labdocker/alpine:latest
 anchore-cli image add labdocker/alpineweb:latest
 
-8. Check status of image analysis by command:
-anchore-cli image list
+9. Check status of image analysis by command: (Wait 5 min for analyze)
+watch anchore-cli image list
 
-9. Get overview of each image analyze result by command:
+10. Get overview of each image analyze result by command:
 anchore-cli image get kong:1.5.1-alpine
 anchore-cli image get bitnami/postgresql:latest
 anchore-cli image get labdocker/alpine:latest
 anchore-cli image get labdocker/alpineweb:latest
 
-10. Check status of anchore system sync database for vulnerability by command:
+11. Check status of anchore system sync database for vulnerability by command:
 anchore-cli system feeds list
 anchore-cli system wait
 

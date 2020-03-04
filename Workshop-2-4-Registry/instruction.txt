@@ -8,7 +8,7 @@ Part1: Registry on single docker-machine
 docker image pull registry:2.7.1
 
 2. Running registry by command:
-	cd ~/docker-workshop-042020/Workshop-2-3-Registry
+	cd ~/docker-workshop-042020/Workshop-2-4-Registry
 
 	docker container run -d -p 5000:5000 \
 	--restart=always --name registrylab \
@@ -43,14 +43,11 @@ docker image pull registry:2.7.1
 	docker image ls
 
 7. Delete docker images from registry
-
 	curl -X DELETE http://127.0.0.1:5000/v2/alpine/manifests/sha256:bf1684a6e3676389ec861c602e97f27b03f14178e5bc3f70dce198f9f160cce9
-	
 
 8. Clean Up Lab by command:
 	docker container stop registrylab
 	docker container rm -v registrylab
-
 
 ===================================
 Registry on multihost docker-machine 
@@ -64,11 +61,11 @@ Registry on multihost docker-machine
 
 10. (Teacher Machine) Check ip address registry machine on control sheet
 
-11. (all) Check folder "Workshop-2-3-Registry" by command
-	ls ~/docker-workshop-042020/Workshop-2-3-Registry
+11. (all) Check folder "Workshop-2-4-Registry" by command
+	ls ~/docker-workshop-042020/Workshop-2-4-Registry
 
 12. (all) Access to folder by command: 
-	cd ~/docker-workshop-042020/Workshop-2-3-Registry
+	cd ~/docker-workshop-042020/Workshop-2-4-Registry
 	pwd
 
 13. (all) Trust certificate via command:
