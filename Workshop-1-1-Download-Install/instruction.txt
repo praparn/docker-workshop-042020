@@ -47,4 +47,3 @@ ubuntu@ip-10-0-1-111:~$
 
 5. Now all workshop is on "/home/ubuntu/docker-workshop-042020"
    ls -lh ~/
-

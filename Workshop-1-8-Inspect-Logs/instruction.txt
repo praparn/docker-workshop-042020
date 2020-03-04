@@ -24,4 +24,4 @@ labdocker/nginx:badversion
 3. Check log of container with command: "docker container logs nginx"
 4. Clean up lab:
 	docker container stop nginx
-	docker container rm nginx	
+	docker container rm nginx

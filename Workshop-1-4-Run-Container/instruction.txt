@@ -47,7 +47,7 @@ e0790d46c800        labdocker/alpineweb:latest   "node hello.js"     6 seconds a
 	3.8 Check mapping port of container by command: "docker container port nodejs"
 	3.9 Rename container name from "nodejs" to "nodejsnew" by command "docker container rename nodejs nodejsnew"
 	3.10 Try stop/start docker with command: "docker container stop nodejsnew","docker container ps -a","docker container start nodejsnew"
-	3.11 After finished to stop container. We will remove docker container with command: "docker container rm nodejsnew"
+	3.11 After finished to stop container. We will remove docker container with command: "docker container stop nodejsnew && docker container rm nodejsnew"
 
 4. Detach PYTHON
 
