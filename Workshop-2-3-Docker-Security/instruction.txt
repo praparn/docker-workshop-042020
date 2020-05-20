@@ -51,11 +51,9 @@ Part2: Docker vulnerability scan via Anchore
 mkdir ~/anchore-volume
 cd ~/anchore-volume
 
-2. Pull template image and extract docker-compose by command:
-docker pull docker.io/anchore/anchore-engine:latest
-docker create --name ae docker.io/anchore/anchore-engine:latest
-docker cp ae:/docker-compose.yaml ~/anchore-volume/docker-compose.yaml
-docker rm ae
+2. Download docker-compose by command:
+curl https://docs.anchore.com/current/docs/engine/quickstart/docker-compose.yaml > docker-compose.yaml
+
 
 3. Start deploy anchore by command:
 docker-compose pull
@@ -162,7 +160,7 @@ Part3: Apparmor in Container
 4. Stop test container by command: "docker container stop sectestdefault && docker container rm sectestdefault"
 
 5. Copy profile and Load apparmor restrict profile by command:
-	sudo apparmor_parser -r -W ~/docker-workshop-042020/Workshop-1-9-Docker-Security/restrict-apparmor
+	sudo apparmor_parser -r -W ~/docker-workshop-042020/Workshop-2-3-Docker-Security/restrict-apparmor
 
 6. Check current profile of apparmor by command: sudo aa-status
 
