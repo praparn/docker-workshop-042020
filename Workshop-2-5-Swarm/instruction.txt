@@ -37,7 +37,6 @@ tmux new -s Lab
 Initial Swarm Cluster
 ===================================================
 1. (master)Initial swarm cluster by command:
-
 	docker swarm init --advertise-addr <Private IP Address of Master>:2377 --task-history-limit 2
 	docker swarm join-token manager
 
@@ -83,9 +82,7 @@ Swarm Service (master)
 
 6. Update reserve/limit CPU by command:
 	docker service update -dt --reserve-cpu 1 --limit-cpu 1 nodejs
-	docker service inspect nodejs | more
-	docker service inspect nodejs | grep update
-	docker service ps nodejs
+	watch docker service ps nodejs
 
 7. Stop & Remove service by command: docker service rm nodejs
 
@@ -100,8 +97,7 @@ Orchestrator Assignment: node constrain (master)
 
 2. Change service with Constrating “node.hostname” and delete Constraint “node.id” by  command below:
 	docker service update -dt --constraint-rm 'node.id==<master nodeid>' --constraint-add 'node.hostname!=<master hostname>' nodejs
-	docker service inspect nodejs | grep update
-	docker service ps nodejs
+	watch docker service ps nodejs
 	docker service rm nodejs
 
 ====================================================
