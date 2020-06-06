@@ -72,6 +72,18 @@ export PATH="$HOME/.local/bin/:$PATH"
 
 6. Check status of anchore by command: (Wait 5 - 10 min for download database)
 watch docker-compose ps
+-----------------------------------------------------
+Example Output:
+-----------------------------------------------------
+             Name                           Command                  State               Ports
+-------------------------------------------------------------------------------------------------------
+anchore-volume_analyzer_1        /docker-entrypoint.sh anch ...   Up (healthy)   8228/tcp
+anchore-volume_api_1             /docker-entrypoint.sh anch ...   Up (healthy)   0.0.0.0:8228->8228/tcp
+anchore-volume_catalog_1         /docker-entrypoint.sh anch ...   Up (healthy)   8228/tcp
+anchore-volume_db_1              docker-entrypoint.sh postgres    Up             5432/tcp
+anchore-volume_policy-engine_1   /docker-entrypoint.sh anch ...   Up (healthy)   8228/tcp
+anchore-volume_queue_1           /docker-entrypoint.sh anch ...   Up (healthy)   8228/tcp
+-----------------------------------------------------
 
 7. Test list image on anchore inventory by command:
 anchore-cli image list
@@ -184,7 +196,7 @@ Part3: Apparmor in Container
 
 10. Stop test container by command: "docker container stop sectestrestrict && docker container rm sectestrestrict"
 
-11. Remove apparmor profile by command: sudo apparmor_parser -R ~/docker-workshop-042020/Workshop-1-9-Docker-Security/restrict-apparmor && sudo aa-status
+11. Remove apparmor profile by command: sudo apparmor_parser -R ~/docker-workshop-042020/Workshop-2-3-Docker-Security/restrict-apparmor && sudo aa-status
 
 
 
